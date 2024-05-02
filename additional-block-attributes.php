@@ -16,7 +16,26 @@ class Additional_Block_Attributes {
 		add_action( 'jet-form-builder/before-start-form-row', array( $this, 'add_attributes' ) );	
 		
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_script' ) );
+
+		add_action( 'init', array( $this, 'register_blocks' ) );
 		
+	}
+
+	public function register_blocks() {
+		register_block_type(
+			'jfb-repeater-collapsible/collapsed-fields-start',
+			array(
+				'render_callback' => function( $attributes ) {
+					$classes = 'collapsed-fields-container';
+
+					if ( ! empty( $attributes['initiallyCollapsed'] ) ) {
+						$classes .= ' collapsed';
+					}
+
+					return sprintf( '<div class="%s"></div>', $classes );
+				}
+			)
+		);
 	}
 
 	public function add_class( $attrs ) {
@@ -33,7 +52,7 @@ class Additional_Block_Attributes {
 			return;
 		}
 		
-		$block->add_attribute( 'data-is-collapsible', $attrs['name'] );
+		$block->add_attribute( 'data-is-collapsible', true );
 
 		$this->enqueue_script();
 
@@ -53,8 +72,7 @@ class Additional_Block_Attributes {
 			'jfb-collapsible-repeater',
 			plugins_url( 'assets/css/frontend.css', __FILE__ ),
 			array(),
-			Plugin::instance()->version,
-			false
+			Plugin::instance()->version
 		);
 
 	}

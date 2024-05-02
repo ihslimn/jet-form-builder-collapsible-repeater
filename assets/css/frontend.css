@@ -1,0 +1,15 @@
+.collapsed-fields-container.collapsed {
+	display: none;
+}
+
+.jet-form-builder-repeater__collapse-toggle:before {
+	content: "▼";
+}
+
+.jet-form-builder-repeater__row-fields:has(.collapsed) + .jet-form-builder-repeater__row-collapse-toggle button:before {
+	content: "▲";
+}
+
+.jet-form-builder-repeater__row-fields:has(.toggle-collapsed) + .jet-form-builder-repeater__row-collapse-toggle button {
+	pointer-events: none;
+}

@@ -1,5 +1,6 @@
 import registerAttributes from './attributes';
 import './controls';
+import registerCollapsedFieldsStart from './blocks/collapsed-fields-start'
 
 const {
 	      addFilter,
@@ -7,6 +8,12 @@ const {
 
 addFilter(
 	'blocks.registerBlockType',
-	'jet-form-builder/switch-page-on-change-support',
+	'jfb-repeater-collapsible/blockAttributes',
 	registerAttributes,
 );
+
+function registerBlocks() {
+	registerCollapsedFieldsStart();
+}
+
+document.addEventListener( 'jet-form-builder-initialized', registerBlocks );

@@ -2,7 +2,7 @@
 
 	function( $ ) {
 
-		$( window ).on( 'jet-form-builder/init', init );
+		document.addEventListener( 'DOMContentLoaded', init );
 
 		function init() {
 
@@ -15,20 +15,31 @@
 				'jfb-repeater-collapsible/repeater',
 				function( input ) {
 
-					if ( input.inputType !== 'repeater' ) {
+					if ( input.inputType !== 'repeater' || ! input.template ) {
 						return;
 					}
 
-					if ( ! input.nodes[0]?.closest( `[data-is-collapsible="${input.name}"]` ) ) {
+					let collapsed = input.template.content.querySelector('.collapsed-fields-container + div');
+
+					if ( ! collapsed ) {
 						return;
 					}
+
+					while ( collapsed ) {
+						input.template.content.querySelector('.collapsed-fields-container').append( collapsed );
+						collapsed = input.template.content.querySelector('.collapsed-fields-container + div:not(.collapsed-fields-container)');
+					}
+
+					let collapsedStateToggleButton = document.createElement( 'div' );
+					collapsedStateToggleButton.classList.add( 'jet-form-builder-repeater__row-collapse-toggle' );
+					collapsedStateToggleButton.innerHTML = '<button type="button" class="jet-form-builder-repeater__collapse-toggle"></button>';
+
+					input.template.content.querySelector( '.jet-form-builder-repeater__row-fields' ).after( collapsedStateToggleButton );
 
 					input.isCollapsibleRepeater = true;
 
 				}
 			);
-
-			//jet.fb.observe.after
 
 			addAction(
 				'jet.fb.observe.after',
@@ -38,21 +49,11 @@
 					if ( ! observable.parent?.isCollapsibleRepeater ) {
 						return;
 					}
-
-					console.log( observable );
-
-					//.jet-form-builder-repeater__row-fields
-
-					let collapsedStateToggleButton = document.createElement( 'div' );
-					collapsedStateToggleButton.classList.add( 'jet-form-builder-repeater__row-collapse-toggle' );
-					collapsedStateToggleButton.innerHTML = '<button type="button" class="jet-form-builder-repeater__collapse-toggle">c</button>';
-
-					//console.log( collapsedStateToggleButton );
-
-					observable.rootNode.querySelector( '.jet-form-builder-repeater__row-fields' ).after( collapsedStateToggleButton );
+					
+					let collapsedStateToggleButton = observable.rootNode.querySelector( '.jet-form-builder-repeater__collapse-toggle' );
 
 					collapsedStateToggleButton.addEventListener( 'click', function() {
-						const rowFields = this.closest( '.jet-form-builder-repeater__row' ).querySelector( '.jet-form-builder-repeater__row-fields' );
+						const rowFields = this.closest( '.jet-form-builder-repeater__row' ).querySelector( '.collapsed-fields-container' );
 
 						toggleCollapsedState( rowFields );
 					} );
@@ -60,12 +61,27 @@
 				}
 			);
 
-			$( window ).off( 'jet-form-builder/init', init );
-			
-		}
+			function toggleCollapsedState( rowFields ) {
+				if ( rowFields.classList.contains( 'toggle-collapsed') ) {
+					return;
+				}
 
-		function toggleCollapsedState( rowFields ) {
-			$( rowFields ).toggleClass( 'collapsed' );
+				const options = {
+					start: () => { rowFields.classList.add( 'toggle-collapsed'); },
+					complete: () => { rowFields.classList.remove( 'toggle-collapsed'); },
+					fail: () => { rowFields.classList.remove( 'toggle-collapsed'); },
+					duration: 10,
+				};
+
+				if ( rowFields.classList.contains( 'collapsed') ) {
+					$( rowFields ).slideDown( options );
+					rowFields.classList.remove( 'collapsed');
+				} else {
+					$( rowFields ).slideUp( options );
+					rowFields.classList.add( 'collapsed');
+				}
+			}
+			
 		}
 
 	}
